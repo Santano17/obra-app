@@ -3,78 +3,240 @@ import pandas as pd
 from datetime import date
 import smtplib
 from email.message import EmailMessage
-import os
+
+# =========================================
+# CONFIGURACIÓN DE LA APP
+# =========================================
+
+st.set_page_config(
+    page_title="Seguimiento de Obra",
+    page_icon="⚡",
+    layout="centered"
+)
+
+# =========================================
+# LOGO EMPRESA
+# =========================================
+
+st.image("logo.png", width=250)
 
 st.title("📊 Seguimiento de Obra")
-
-# 🧠 Estado en memoria
-if "registros" not in st.session_state:
-    st.session_state.registros = []
-
-# 👷 Datos
-trabajador = st.text_input("👷 Trabajador")
-fecha_envio = st.date_input("📅 Fecha", value=date.today())
-
-tareas = ["Trazado y marcado", "Ejecución rozas", "Montaje soportes"]
-estados = ["25%", "50%", "75%", "Finalizado"]
-
-tarea = st.selectbox("Tarea", tareas)
-estado = st.selectbox("Estado", estados)
-
-# ➕ Añadir registro
-if st.button("Añadir"):
-    st.session_state.registros.append({
-        "Trabajador": trabajador,
-        "Fecha": fecha_envio,
-        "Tarea": tarea,
-        "Estado": estado
-    })
-    st.success("Registro añadido")
+st.subheader("SANTANO S.L. - OBRA ELÉCTRICA")
 
 st.divider()
 
-# 📋 DataFrame
-df = pd.DataFrame(st.session_state.registros)
-st.dataframe(df)
+# =========================================
+# MEMORIA DE REGISTROS
+# =========================================
 
-# 📁 Generar Excel temporal
-excel_file = "obra.xlsx"
-df.to_excel(excel_file, index=False)
+if "registros" not in st.session_state:
+    st.session_state.registros = []
 
-# 📧 Función enviar correo
-def enviar_email(destino, archivo):
+# =========================================
+# CAMPOS DEL FORMULARIO
+# =========================================
 
-    remitente = "tuempresa@gmail.com"
-    password = "CONTRASEÑA_DE_APP"  # importante: no usar contraseña normal
+trabajador = st.text_input(
+    "👷 Nombre del trabajador"
+)
 
-    msg = EmailMessage()
-    msg["Subject"] = "📊 Parte de obra"
-    msg["From"] = remitente
-    msg["To"] = destino
-    msg.set_content("Adjunto el parte de obra en Excel.")
+fecha_envio = st.date_input(
+    "📅 Fecha del informe",
+    value=date.today()
+)
 
-    with open(archivo, "rb") as f:
-        file_data = f.read()
+# =========================================
+# LISTA DE TAREAS
+# =========================================
 
-    msg.add_attachment(
-        file_data,
-        maintype="application",
-        subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        filename="parte_obra.xlsx"
+tareas = [
+    "Trazado y marcado de cajas, tubos y cuadros",
+    "Ejecución rozas en paredes y techos",
+    "Montaje de soportes",
+    "Colocación tubos y conductos",
+    "Tendido de cables",
+    "Identificación y etiquetado",
+    "Conexionado de cables en bornes o regletas",
+    "Instalación y conexionado de mecanismos",
+    "Fijación de carril DIN y mecanismos en cuadro eléctrico",
+    "Cableado interno del cuadro eléctrico",
+    "Configuración de equipos domóticos y/o automáticos",
+    "Conexionado de sensores/actuadores de equipos domóticos/automáticos",
+    "Pruebas de continuidad",
+    "Pruebas de aislamiento",
+    "Verificación de tierras",
+    "Programación del automatismo",
+    "Pruebas de funcionamiento"
+]
+
+tarea = st.selectbox(
+    "🛠️ Selecciona la tarea",
+    tareas
+)
+
+# =========================================
+# ESTADO DE LA TAREA
+# =========================================
+
+estados = [
+    "Avance de la tarea en torno al 25%",
+    "Avance de la tarea en torno al 50%",
+    "Avance de la tarea en torno al 75%",
+    "OK, finalizado sin errores",
+    "Finalizado, pero con errores pendientes",
+    "Finalizado y corregidos los errores"
+]
+
+estado = st.selectbox(
+    "📊 Estado de la tarea",
+    estados
+)
+
+# =========================================
+# BOTÓN AÑADIR REGISTRO
+# =========================================
+
+if st.button("➕ Añadir registro"):
+
+    if trabajador == "":
+        st.warning("Introduce el nombre del trabajador")
+
+    else:
+
+        nuevo_registro = {
+            "Trabajador": trabajador,
+            "Fecha": fecha_envio,
+            "Tarea": tarea,
+            "Estado": estado
+        }
+
+        st.session_state.registros.append(
+            nuevo_registro
+        )
+
+        st.success("✅ Registro añadido correctamente")
+
+# =========================================
+# MOSTRAR REGISTROS
+# =========================================
+
+st.divider()
+
+st.subheader("📋 Registros guardados")
+
+df = pd.DataFrame(
+    st.session_state.registros
+)
+
+st.dataframe(
+    df,
+    use_container_width=True
+)
+
+# =========================================
+# EXPORTAR A EXCEL
+# =========================================
+
+if len(df) > 0:
+
+    nombre_excel = "seguimiento_obra.xlsx"
+
+    df.to_excel(
+        nombre_excel,
+        index=False
     )
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-        smtp.login(remitente, password)
+    # =====================================
+    # DESCARGAR EXCEL
+    # =====================================
+
+    with open(nombre_excel, "rb") as file:
+
+        st.download_button(
+            label="📥 Descargar Excel",
+            data=file,
+            file_name=nombre_excel,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+# =========================================
+# CONFIGURACIÓN EMAIL
+# =========================================
+
+EMAIL_REMITENTE = "tuempresa@gmail.com"
+
+# IMPORTANTE:
+# Usa contraseña de aplicación Google
+# SIN espacios
+# SIN ñ
+# SIN símbolos raros
+
+PASSWORD_EMAIL = "abcdefghijklmnop"
+
+EMAIL_DESTINO = "empresa@correo.com"
+
+# =========================================
+# FUNCIÓN ENVIAR EMAIL
+# =========================================
+
+def enviar_email(destino, archivo_excel):
+
+    msg = EmailMessage()
+
+    msg["Subject"] = "📊 Parte de obra"
+    msg["From"] = EMAIL_REMITENTE
+    msg["To"] = destino
+
+    msg.set_content(
+        "Adjunto Excel de seguimiento de obra."
+    )
+
+    # Adjuntar Excel
+    with open(archivo_excel, "rb") as f:
+
+        contenido = f.read()
+
+        msg.add_attachment(
+            contenido,
+            maintype="application",
+            subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            filename=archivo_excel
+        )
+
+    # Enviar correo
+    with smtplib.SMTP_SSL(
+        "smtp.gmail.com",
+        465
+    ) as smtp:
+
+        smtp.login(
+            EMAIL_REMITENTE,
+            PASSWORD_EMAIL
+        )
+
         smtp.send_message(msg)
 
-# 📩 Email destino fijo empresa
-email_empresa = "empresa@correo.com"
+# =========================================
+# BOTÓN ENVIAR EMAIL
+# =========================================
 
-# 🚀 Botón enviar
-if st.button("📧 Enviar Excel por correo"):
+if len(df) > 0:
 
-    if len(df) == 0:
-        st.warning("No hay datos para enviar")
-    else:
-        enviar_email(email_empresa, excel_file)
-        st.success("Excel enviado correctamente")
+    if st.button("📧 Enviar Excel por correo"):
+
+        try:
+
+            enviar_email(
+                EMAIL_DESTINO,
+                nombre_excel
+            )
+
+            st.success(
+                "✅ Excel enviado correctamente"
+            )
+
+        except Exception as e:
+
+            st.error(
+                f"❌ Error enviando email: {e}"
+            )
