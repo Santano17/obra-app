@@ -176,7 +176,7 @@ PASSWORD_EMAIL = st.secrets["zvbhfagykqjpjubo"]
 
 # Correo destino empresa
 
-EMAIL_DESTINO = "empresa@correo.com"
+EMAIL_DESTINO = "ana@fundacionmasaveu.com"
 
 # =====================================================
 # FUNCIÓN ENVIAR EMAIL
