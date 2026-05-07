@@ -164,7 +164,7 @@ if len(df) > 0:
 # Ejemplo:
 # empresaobra@gmail.com
 
-EMAIL_REMITENTE = "nunezs.daniel@alumnos25.fundacionmasaveu.com"
+EMAIL_REMITENTE = st.secrets["nunezs.daniel@alumnos25.fundacionmasaveu.com"]
 
 # IMPORTANTE:
 # Usa contraseña de aplicación Google
@@ -172,11 +172,11 @@ EMAIL_REMITENTE = "nunezs.daniel@alumnos25.fundacionmasaveu.com"
 # SIN ñ
 # SIN tildes
 
-PASSWORD_EMAIL = "zvbhfagykqjpjubo"
+PASSWORD_EMAIL = st.secrets["zvbhfagykqjpjubo"]
 
 # Correo destino empresa
 
-EMAIL_DESTINO = "ana@fundacionmasaveu.com"
+EMAIL_DESTINO = "empresa@correo.com"
 
 # =====================================================
 # FUNCIÓN ENVIAR EMAIL
