@@ -4,9 +4,9 @@ from datetime import date
 import smtplib
 from email.message import EmailMessage
 
-# =========================================
+# =====================================================
 # CONFIGURACIÓN DE LA APP
-# =========================================
+# =====================================================
 
 st.set_page_config(
     page_title="Seguimiento de Obra",
@@ -14,9 +14,9 @@ st.set_page_config(
     layout="centered"
 )
 
-# =========================================
+# =====================================================
 # LOGO EMPRESA
-# =========================================
+# =====================================================
 
 st.image("logo.png", width=250)
 
@@ -25,16 +25,16 @@ st.subheader("SANTANO S.L. - OBRA ELÉCTRICA")
 
 st.divider()
 
-# =========================================
-# MEMORIA DE REGISTROS
-# =========================================
+# =====================================================
+# MEMORIA TEMPORAL DE REGISTROS
+# =====================================================
 
 if "registros" not in st.session_state:
     st.session_state.registros = []
 
-# =========================================
-# CAMPOS DEL FORMULARIO
-# =========================================
+# =====================================================
+# DATOS DEL FORMULARIO
+# =====================================================
 
 trabajador = st.text_input(
     "👷 Nombre del trabajador"
@@ -45,9 +45,9 @@ fecha_envio = st.date_input(
     value=date.today()
 )
 
-# =========================================
-# LISTA DE TAREAS
-# =========================================
+# =====================================================
+# LISTADO DE TAREAS
+# =====================================================
 
 tareas = [
     "Trazado y marcado de cajas, tubos y cuadros",
@@ -74,9 +74,9 @@ tarea = st.selectbox(
     tareas
 )
 
-# =========================================
-# ESTADO DE LA TAREA
-# =========================================
+# =====================================================
+# ESTADOS DE LA TAREA
+# =====================================================
 
 estados = [
     "Avance de la tarea en torno al 25%",
@@ -92,14 +92,14 @@ estado = st.selectbox(
     estados
 )
 
-# =========================================
-# BOTÓN AÑADIR REGISTRO
-# =========================================
+# =====================================================
+# BOTÓN PARA AÑADIR REGISTRO
+# =====================================================
 
 if st.button("➕ Añadir registro"):
 
-    if trabajador == "":
-        st.warning("Introduce el nombre del trabajador")
+    if trabajador.strip() == "":
+        st.warning("⚠️ Introduce el nombre del trabajador")
 
     else:
 
@@ -116,9 +116,9 @@ if st.button("➕ Añadir registro"):
 
         st.success("✅ Registro añadido correctamente")
 
-# =========================================
+# =====================================================
 # MOSTRAR REGISTROS
-# =========================================
+# =====================================================
 
 st.divider()
 
@@ -133,66 +133,70 @@ st.dataframe(
     use_container_width=True
 )
 
-# =========================================
+# =====================================================
 # EXPORTAR A EXCEL
-# =========================================
+# =====================================================
+
+nombre_excel = "seguimiento_obra.xlsx"
 
 if len(df) > 0:
-
-    nombre_excel = "seguimiento_obra.xlsx"
 
     df.to_excel(
         nombre_excel,
         index=False
     )
 
-    # =====================================
-    # DESCARGAR EXCEL
-    # =====================================
-
-    with open(nombre_excel, "rb") as file:
+    with open(nombre_excel, "rb") as archivo:
 
         st.download_button(
             label="📥 Descargar Excel",
-            data=file,
+            data=archivo,
             file_name=nombre_excel,
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
-# =========================================
+# =====================================================
 # CONFIGURACIÓN EMAIL
-# =========================================
+# =====================================================
 
-EMAIL_REMITENTE = "tuempresa@gmail.com"
+# IMPORTANTE:
+# Debe ser Gmail
+# Ejemplo:
+# empresaobra@gmail.com
+
+EMAIL_REMITENTE = "tuemail@gmail.com"
 
 # IMPORTANTE:
 # Usa contraseña de aplicación Google
 # SIN espacios
 # SIN ñ
-# SIN símbolos raros
+# SIN tildes
 
 PASSWORD_EMAIL = "abcdefghijklmnop"
 
+# Correo destino empresa
+
 EMAIL_DESTINO = "empresa@correo.com"
 
-# =========================================
+# =====================================================
 # FUNCIÓN ENVIAR EMAIL
-# =========================================
+# =====================================================
 
-def enviar_email(destino, archivo_excel):
+def enviar_email():
 
     msg = EmailMessage()
 
-    msg["Subject"] = "📊 Parte de obra"
-    msg["From"] = EMAIL_REMITENTE
-    msg["To"] = destino
+    msg["Subject"] = "Parte de obra"
+    msg["From"] = EMAIL_REMITENTE.strip()
+    msg["To"] = EMAIL_DESTINO.strip()
 
     msg.set_content(
-        "Adjunto Excel de seguimiento de obra."
+        "Adjunto Excel generado desde la app de seguimiento de obra."
     )
 
     # Adjuntar Excel
-    with open(archivo_excel, "rb") as f:
+
+    with open(nombre_excel, "rb") as f:
 
         contenido = f.read()
 
@@ -200,25 +204,26 @@ def enviar_email(destino, archivo_excel):
             contenido,
             maintype="application",
             subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            filename=archivo_excel
+            filename=nombre_excel
         )
 
-    # Enviar correo
+    # Servidor Gmail
+
     with smtplib.SMTP_SSL(
         "smtp.gmail.com",
         465
     ) as smtp:
 
         smtp.login(
-            EMAIL_REMITENTE,
-            PASSWORD_EMAIL
+            EMAIL_REMITENTE.strip(),
+            PASSWORD_EMAIL.strip()
         )
 
         smtp.send_message(msg)
 
-# =========================================
+# =====================================================
 # BOTÓN ENVIAR EMAIL
-# =========================================
+# =====================================================
 
 if len(df) > 0:
 
@@ -226,10 +231,7 @@ if len(df) > 0:
 
         try:
 
-            enviar_email(
-                EMAIL_DESTINO,
-                nombre_excel
-            )
+            enviar_email()
 
             st.success(
                 "✅ Excel enviado correctamente"
@@ -238,5 +240,15 @@ if len(df) > 0:
         except Exception as e:
 
             st.error(
-                f"❌ Error enviando email: {e}"
+                f"❌ Error enviando correo: {e}"
             )
+
+# =====================================================
+# INFORMACIÓN FINAL
+# =====================================================
+
+st.divider()
+
+st.info(
+    "📱 App desarrollada en Streamlit para seguimiento de obra."
+)
