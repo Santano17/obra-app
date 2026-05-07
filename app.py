@@ -18,7 +18,10 @@ st.set_page_config(
 # LOGO EMPRESA
 # =====================================================
 
-st.image("logo.png", width=250)
+try:
+    st.image("logo.png", width=250)
+except:
+    st.warning("⚠️ No se encontró el archivo logo.png")
 
 st.title("📊 Seguimiento de Obra")
 st.subheader("SANTANO S.L. - OBRA ELÉCTRICA")
@@ -104,7 +107,7 @@ if st.button("➕ Añadir registro"):
     else:
 
         nuevo_registro = {
-            "Trabajador": trabajador,
+            "Trabajador": trabajador.strip(),
             "Fecha": fecha_envio,
             "Tarea": tarea,
             "Estado": estado
@@ -128,10 +131,13 @@ df = pd.DataFrame(
     st.session_state.registros
 )
 
-st.dataframe(
-    df,
-    use_container_width=True
-)
+if len(df) > 0:
+    st.dataframe(
+        df,
+        use_container_width=True
+    )
+else:
+    st.info("Todavía no hay registros")
 
 # =====================================================
 # EXPORTAR A EXCEL
@@ -159,23 +165,13 @@ if len(df) > 0:
 # CONFIGURACIÓN EMAIL
 # =====================================================
 
-# IMPORTANTE:
-# Debe ser Gmail
-# Ejemplo:
-# empresaobra@gmail.com
+# CORREO GMAIL REMITENTE
+EMAIL_REMITENTE = "nunezs.daniel@alumnos25.fundacionmasaveu.com"
 
-EMAIL_REMITENTE = ["nunezs.daniel@alumnos25.fundacionmasaveu.com"]
+# CONTRASEÑA DE APLICACIÓN GOOGLE
+PASSWORD_EMAIL = "zvbhfagykqjpjubo"
 
-# IMPORTANTE:
-# Usa contraseña de aplicación Google
-# SIN espacios
-# SIN ñ
-# SIN tildes
-
-PASSWORD_EMAIL = ["zvbhfagykqjpjubo"]
-
-# Correo destino empresa
-
+# DESTINATARIO
 EMAIL_DESTINO = "ana@fundacionmasaveu.com"
 
 # =====================================================
@@ -184,18 +180,30 @@ EMAIL_DESTINO = "ana@fundacionmasaveu.com"
 
 def enviar_email():
 
+    # Asegurar que todo sea string
+    remitente = str(EMAIL_REMITENTE).strip()
+    password = str(PASSWORD_EMAIL).strip()
+
+    # Permitir uno o varios destinatarios
+    if isinstance(EMAIL_DESTINO, list):
+        destinatarios = [str(x).strip() for x in EMAIL_DESTINO]
+        destino_header = ", ".join(destinatarios)
+    else:
+        destinatarios = [str(EMAIL_DESTINO).strip()]
+        destino_header = destinatarios[0]
+
+    # Crear mensaje
     msg = EmailMessage()
 
     msg["Subject"] = "Parte de obra"
-    msg["From"] = EMAIL_REMITENTE.strip()
-    msg["To"] = EMAIL_DESTINO.strip()
+    msg["From"] = remitente
+    msg["To"] = destino_header
 
     msg.set_content(
         "Adjunto Excel generado desde la app de seguimiento de obra."
     )
 
     # Adjuntar Excel
-
     with open(nombre_excel, "rb") as f:
 
         contenido = f.read()
@@ -207,16 +215,15 @@ def enviar_email():
             filename=nombre_excel
         )
 
-    # Servidor Gmail
-
+    # Conexión Gmail
     with smtplib.SMTP_SSL(
         "smtp.gmail.com",
         465
     ) as smtp:
 
         smtp.login(
-            EMAIL_REMITENTE.strip(),
-            PASSWORD_EMAIL.strip()
+            remitente,
+            password
         )
 
         smtp.send_message(msg)
