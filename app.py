@@ -164,7 +164,7 @@ if len(df) > 0:
 # Ejemplo:
 # empresaobra@gmail.com
 
-EMAIL_REMITENTE = "tuemail@gmail.com"
+EMAIL_REMITENTE = "nunezs.daniel@alumnos25.fundacionmasaveu.com"
 
 # IMPORTANTE:
 # Usa contraseña de aplicación Google
@@ -172,11 +172,11 @@ EMAIL_REMITENTE = "tuemail@gmail.com"
 # SIN ñ
 # SIN tildes
 
-PASSWORD_EMAIL = "abcdefghijklmnop"
+PASSWORD_EMAIL = "zvbhfagykqjpjubo"
 
 # Correo destino empresa
 
-EMAIL_DESTINO = "empresa@correo.com"
+EMAIL_DESTINO = "ana@fundacionmasaveu.com"
 
 # =====================================================
 # FUNCIÓN ENVIAR EMAIL
